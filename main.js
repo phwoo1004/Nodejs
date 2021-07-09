@@ -222,7 +222,7 @@ var app = http.createServer(function(request, response) {
     */
 
     // MySQL
-    db.query(`SELECT * FROM topic`, functuon(error, topics) {
+    db.query(`SELECT * FROM topic`, function(error, topics) {
       if (error) {
         throw error;
       }
@@ -231,26 +231,24 @@ var app = http.createServer(function(request, response) {
           throw error2;
         }
         var list = template.List(topics); // 목록
-
-        // 검색 엔진에 수정할 웹페이지의 정보를 표시 (예 : /update?id=CSS)
         var html = template.HTML(topic[0].title, list,
           `
           <form action="/update_process" method="post">
-            <input type="hidden" name="id" value="${topic[0].id}"> <!-- update_process : 수정할 파일의 이름을 받을 수 있음 --!>
-
+            <input type="hidden" name="id" value="${topic[0].id}">
             <p><input type="text" name="title" placeholder="title" value="${topic[0].title}"></p>
             <p><textarea name="description" placeholder="description">${topic[0].description}</textarea></p>
             <p><input type="submit"></p>
           </form>
           `,
           `<a href="/create">create</a> <a href="/update?id=${topic[0].id}">update</a>`
-        );
+        ); // 링크
         response.writeHead(200);
         response.end(html);
       });
     });
   }
   else if (pathname === '/update_process') { // update 웹페이지에서 '제출'을 클릭하면 나오는 웹페이지
+    /*
     var body = '';
     request.on('data', function(data) {
       body = body + data;
@@ -267,6 +265,23 @@ var app = http.createServer(function(request, response) {
           response.writeHead(302, {Location : `/?id=${title}`});
           response.end();
         });
+      });
+    });
+    */
+
+    // MySQL
+    var body = '';
+    request.on('data', function(data) {
+      body = body + data;
+    });
+    request.on('end', function() {
+      var post = qs.parse(body);
+      db.query(`UPDATE topic SET title=?, description=?, author_id=1 WHERE id=?`, [post.title, post.description, post.id], function(error, result) {
+        if (error) {
+          throw error;
+        }
+        response.writeHead(302, {Location : `/?id=${post.id}`});
+        response.end();
       });
     });
   }
