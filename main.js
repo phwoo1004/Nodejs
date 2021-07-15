@@ -95,7 +95,7 @@ var app = http.createServer(function(request, response) {
         if (error) {
           throw error;
         }
-        db.query(`SELECT * FROM topic WHERE id=?`, [queryData.id], function(error2, topic) { // 배열의 값이 SQL문의 '?'에 치환되어 자동으로 들어감, 공격 의도의 가능성이 있는 것들은 세탁해주는 기능을 알아서 실행
+        db.query(`SELECT * FROM topic LEFT JOIN author ON topic.author_id=author_id WHERE topic.id=?`, [queryData.id], function(error2, topic) { // 배열의 값이 SQL문의 '?'에 치환되어 자동으로 들어감, 공격 의도의 가능성이 있는 것들은 세탁해주는 기능을 알아서 실행
           if (error2) {
             throw error2;
           }
@@ -104,7 +104,11 @@ var app = http.createServer(function(request, response) {
           var list = template.List(topics); // 목록
 
           var html = template.HTML(title, list,
-            `<h2>${title}</h2>${description}`,
+            `
+            <h2>${title}</h2>
+            ${description}
+            <p>by ${topic[0].name}</p>
+            `,
             `
             <a href="/create">create</a> <a href="/update?id=${queryData.id}">update</a>
             <form action="delete_process" method="post" onsubmit="정말로 삭제하시겠습니까?.">
@@ -144,21 +148,26 @@ var app = http.createServer(function(request, response) {
 
     // MySQL
     db.query(`SELECT * FROM topic`, function(error, topics) {
-      var title = 'create'; // 제목
-      var list = template.List(topics); // 목록
+      db.query(`SELECT * FROM author`, function(error2, authors) {
+        var title = 'create'; // 제목
+        var list = template.List(topics); // 목록
 
-      var html = template.HTML(title, list,
-        `
-        <form action="/create_process" method="post">
-          <p><input type="text" name="title" placeholder="title"></p>
-          <p><textarea name="description" placeholder="description"></textarea></p>
-          <p><input type="submit"></p>
-        </form>
-        `,
-        `<a href="/create">create</a>`
-      ); // 링크
-      response.writeHead(200);
-      response.end(html);
+        var html = template.HTML(title, list,
+          `
+          <form action="/create_process" method="post">
+            <p><input type="text" name="title" placeholder="title"></p>
+            <p><textarea name="description" placeholder="description"></textarea></p>
+            <p>
+              ${template.authorSelect(authors)}
+            </p>
+            <p><input type="submit"></p>
+          </form>
+          `,
+          `<a href="/create">create</a>`
+        ); // 링크
+        response.writeHead(200);
+        response.end(html);
+      });
     });
   }
   else if (pathname === '/create_process') { // create 웹페이지에서 '제출'을 클릭하면 나오는 웹페이지 (현재는 '제출'을 클릭했을 때, 생성된 웹페이지를 나타내도록 설정되어 있음)
@@ -183,7 +192,7 @@ var app = http.createServer(function(request, response) {
       // MySQL
       db.query(`
         INSERT INTO topic(title, description, created, author_id) VALUES(?, ?, NOW(), ?)`,
-        [post.title, post.description, 1],
+        [post.title, post.description, post.author],
         function(error, result) {
           if (error) {
             throw error;
