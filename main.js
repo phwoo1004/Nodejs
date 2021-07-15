@@ -286,6 +286,7 @@ var app = http.createServer(function(request, response) {
     });
   }
   else if (pathname === '/delete_process') { // delete 웹페이지에서 '제출'을 클릭하면 나오는 웹페이지
+    /*
     var body = '';
     request.on('data', function(data) {
       body = body + data;
@@ -298,6 +299,23 @@ var app = http.createServer(function(request, response) {
       var filteredId = path.parse(id).base;
       fs.unlink(`data/${filteredId}`, function(err) {
         response.writeHead(302, {Location : `/`}); // 파일 삭제를 완료하면 홈(WEB)으로 보냄
+        response.end();
+      });
+    });
+    */
+
+    // MySQL
+    var body = '';
+    request.on('data', function(data) {
+      body = body + data;
+    });
+    request.on('end', function() {
+      var post = qs.parse(body);
+      db.query(`DELETE FROM topic WHERE id=?`, [post.id], function(error, result) {
+        if (error) {
+          throw error;
+        }
+        response.writeHead(302, {Location : `/`});
         response.end();
       });
     });
