@@ -95,7 +95,7 @@ var app = http.createServer(function(request, response) {
         if (error) {
           throw error;
         }
-        db.query(`SELECT * FROM topic LEFT JOIN author ON topic.author_id=author_id WHERE topic.id=?`, [queryData.id], function(error2, topic) { // 배열의 값이 SQL문의 '?'에 치환되어 자동으로 들어감, 공격 의도의 가능성이 있는 것들은 세탁해주는 기능을 알아서 실행
+        db.query(`SELECT * FROM topic LEFT JOIN author ON topic.author_id=author.id WHERE topic.id=?`, [queryData.id], function(error2, topic) { // 배열의 값이 SQL문의 '?'에 치환되어 자동으로 들어감, 공격 의도의 가능성이 있는 것들은 세탁해주는 기능을 알아서 실행
           if (error2) {
             throw error2;
           }
@@ -178,9 +178,6 @@ var app = http.createServer(function(request, response) {
     });
     request.on('end', function() {
       var post = qs.parse(body);
-      var title = post.title;
-      var description = post.description;
-
       /*
       // 파일 생성 (Create : '제출'을 클릭하면 data 폴더에 해당 파일이 생성됨)
       fs.writeFile(`data/${title}`, description, 'utf8', function(err) {
