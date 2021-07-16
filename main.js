@@ -232,24 +232,29 @@ var app = http.createServer(function(request, response) {
       if (error) {
         throw error;
       }
-      db.query(`SELECT * FROM topic WHERE id=?`, [queryData.id], function(error2, topic) {
-        if (error2) {
-          throw error2;
-        }
-        var list = template.List(topics); // 목록
-        var html = template.HTML(topic[0].title, list,
-          `
-          <form action="/update_process" method="post">
-            <input type="hidden" name="id" value="${topic[0].id}">
-            <p><input type="text" name="title" placeholder="title" value="${topic[0].title}"></p>
-            <p><textarea name="description" placeholder="description">${topic[0].description}</textarea></p>
-            <p><input type="submit"></p>
-          </form>
-          `,
-          `<a href="/create">create</a> <a href="/update?id=${topic[0].id}">update</a>`
-        ); // 링크
-        response.writeHead(200);
-        response.end(html);
+      db.query(`SELECT * FROM author`, function(error2, authors) {
+        db.query(`SELECT * FROM topic WHERE id=?`, [queryData.id], function(error2, topic) {
+          if (error2) {
+            throw error2;
+          }
+          var list = template.List(topics); // 목록
+          var html = template.HTML(topic[0].title, list,
+            `
+            <form action="/update_process" method="post">
+              <input type="hidden" name="id" value="${topic[0].id}">
+              <p><input type="text" name="title" placeholder="title" value="${topic[0].title}"></p>
+              <p><textarea name="description" placeholder="description">${topic[0].description}</textarea></p>
+              <p>
+                ${template.authorSelect(authors, topic[0].author_id)}
+              </p>
+              <p><input type="submit"></p>
+            </form>
+            `,
+            `<a href="/create">create</a> <a href="/update?id=${topic[0].id}">update</a>`
+          ); // 링크
+          response.writeHead(200);
+          response.end(html);
+        });
       });
     });
   }
@@ -282,7 +287,7 @@ var app = http.createServer(function(request, response) {
     });
     request.on('end', function() {
       var post = qs.parse(body);
-      db.query(`UPDATE topic SET title=?, description=?, author_id=1 WHERE id=?`, [post.title, post.description, post.id], function(error, result) {
+      db.query(`UPDATE topic SET title=?, description=?, author_id=? WHERE id=?`, [post.title, post.description, post.author, post.id], function(error, result) {
         if (error) {
           throw error;
         }
