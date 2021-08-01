@@ -7,6 +7,7 @@ var template = require('./lib/template.js');
 var db = require('./lib/db'); // 정리정돈 - db접속
 var topic = require('./lib/topic'); // 정리정돈 - SQL
 var author = require('./lib/author');
+var login = require('./lib/login');
 
 var app = http.createServer(function(request, response) {
   var _url = request.url;
@@ -54,63 +55,13 @@ var app = http.createServer(function(request, response) {
   }
 
   else if (pathname === '/login') {
-    fs.readdir('./data', function(error, filelist) {
-      var title = 'Login';
-      var list = template.List(filelist);
-      var html = template.HTML(title, list,
-        `
-        <form action="login_process" method="post">
-          <p><input type="text" name="email" placeholder="email"></p>
-          <p><input type="password" name="password" placeholder="password"></p>
-          <p><input type="submit"></p>
-        </form>
-        `,
-        `<a href="/create">create</a>`
-      );
-      response.writeHead(200);
-      response.end(html);
-    });
+    login.login(request, response);
   }
   else if (pathname === '/login_process') {
-    var body = '';
-    request.on('data', function(data) {
-      body += data;
-    });
-    request.on('end', function() {
-      var post = qs.parse(body);
-      if (post.email === 'nodejs' && post.password === '111111') {
-        response.writeHead(302, {
-          'Set-Cookie':[
-            `email=${post.email}`,
-            `password=${post.password}`,
-            'nickname=nodejs'
-          ],
-          Location: '/'
-        });
-        response.end();
-      }
-      else {
-        response.end('Who?');
-      }
-    });
+    login.login_process(request, response);
   }
   else if (pathname === '/logout_process') {
-    var body = '';
-    request.on('data', function(data) {
-      body += data;
-    });
-    request.on('end', function() {
-      var post = qs.parse(body);
-      response.writeHead(302, {
-        'Set-Cookie':[
-          `email=; Max-Age=0`,
-          `password=; Max-Age=0`,
-          `nickname=; Max-Age=0`
-        ],
-        Location: '/'
-      });
-      response.end();
-    });
+    login.logout_process(request, response);
   }
 
   else { // 404 Not Found
