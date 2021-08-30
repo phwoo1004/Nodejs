@@ -49,7 +49,7 @@ async function getUser() {
 
 window.onload = getUser(); // 화면 로딩 시 getUser 호출
 // 폼 제출(submit) 시 실행
-decument.getElementById('form').addEventListener('submit', async (e) => {
+document.getElementById('form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const name = e.target.username.value;
     if (!name) {
