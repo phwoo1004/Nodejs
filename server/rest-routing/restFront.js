@@ -1,11 +1,11 @@
-async function getUser() {
+async function getUser() { // 로딩 시 사용자 정보를 가져오는 함수
     try {
         const res = await axios.get('/users');
         const users = res.data;
         const list = document.getElementById('list');
         list.innerHTML = '';
 
-        Object.keys(users).map(function (key) {
+        Object.keys(users).map(function (key) { // 사용자마다 반복적으로 화면 표시 및 이벤트 연결
             const userDiv = document.createElement('div');
             const span = document.createElement('span');
             span.textContent = users[key];
@@ -26,7 +26,7 @@ async function getUser() {
             });
             const remove = document.createElement('button');
             remove.textContent = '삭제';
-            remove.addEventListener('click', async () => {
+            remove.addEventListener('click', async () => { // 삭제 버튼 클릭
                 try {
                     await axios.delete('/user/' + key);
                     getUser();
@@ -47,16 +47,15 @@ async function getUser() {
     }
 }
 
-window.onload = getUser(); // 화면 로딩 시 getUser 호출
-// 폼 제출(submit) 시 실행
-document.getElementById('form').addEventListener('submit', async (e) => {
+window.onload = getUser; // 화면 로딩 시 getUser 호출
+document.getElementById('form').addEventListener('submit', async (e) => { // 폼 제출(submit) 시 실행
     e.preventDefault();
     const name = e.target.username.value;
     if (!name) {
         return alert('이름을 입력하세요');
     }
     try {
-        await axois.post('/user', { name });
+        await axios.post('/user', { name });
         getUser();
     }
     catch(err) {
