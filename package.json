@@ -26,6 +26,7 @@
     "mysql2": "^2.3.3",
     "nunjucks": "^3.2.3",
     "pug": "^3.0.2",
+    "sequelize": "^6.17.0",
     "sequelize-cli": "^6.4.1"
   },
   "devDependencies": {
