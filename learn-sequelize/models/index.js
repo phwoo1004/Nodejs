@@ -3,6 +3,8 @@
 const fs = require('fs');
 const path = require('path');
 const Sequelize = require('sequelize');
+const User = require('./user');
+const Comment = require('./comment');
 const basename = path.basename(__filename);
 const env = process.env.NODE_ENV || 'development'; // production : 배포용
 const config = require(__dirname + '/../config/config.json')[env];
@@ -33,5 +35,14 @@ Object.keys(db).forEach(modelName => {
 
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
+
+db.User = User;
+db.Comment = Comment;
+
+User.init(sequelize);
+Comment.init(sequelize);
+
+User.associate(db);
+Comment.associate(db);
 
 module.exports = db;
